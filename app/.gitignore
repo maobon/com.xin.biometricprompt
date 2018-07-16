@@ -13,3 +13,4 @@ BiometricPrompt-P.iml
 local.properties
 /.idea/libraries/
 /.idea/dictionaries/
+/build/

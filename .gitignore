@@ -5,3 +5,11 @@ local.properties
 /.idea/dictionaries/
 /.idea/
 app/build/
+BiometricPromptDemo.iml
+app/.DS_Store
+app/libs/
+app/src/.DS_Store
+/app/build/
+.DS_Store
+libs/
+src/.DS_Store
