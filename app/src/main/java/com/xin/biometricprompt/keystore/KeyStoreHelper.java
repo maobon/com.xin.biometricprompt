@@ -3,6 +3,9 @@ package com.xin.biometricprompt.keystore;
 import android.content.Context;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.util.Base64;
+
+import org.json.JSONArray;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -74,5 +77,26 @@ public class KeyStoreHelper {
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(KEY_ALIAS, null);
 
         return new KeyPair(publicKey, privateKey);
+    }
+
+    public String exportKeyAttestation(String keyUUID) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+        ks.load(null);
+
+        Certificate[] certArr = ks.getCertificateChain(keyUUID);
+        String certArray[] = new String[certArr.length];
+
+        int i = 0;
+        for (Certificate cert : certArr) {
+            byte[] buf = cert.getEncoded();
+            certArray[i] = new String(Base64.encode(buf, Base64.DEFAULT));
+            i++;
+        }
+
+        JSONArray jsonArray = new JSONArray(certArray);
+        String key_attestation_data = jsonArray.toString();
+        sb.append(key_attestation_data);
+        return sb.toString();
     }
 }

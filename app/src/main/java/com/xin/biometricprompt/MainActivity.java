@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -29,6 +30,8 @@ import java.security.Signature;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final String TAG = "MainActivity";
+
     private static final String SRC_DATA = "Hello!Android P version, biometric prompt demo.";
     private String dataSigned;
 
@@ -44,13 +47,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void initViews() {
         findViewById(R.id.btn_register).setOnClickListener(this);
         findViewById(R.id.btn_auth).setOnClickListener(this);
+        findViewById(R.id.btn_export_key_attestation).setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_register:
-
                 try {
                     KeyStoreHelper keyStoreHelper = KeyStoreHelper.getInstance();
                     keyStoreHelper.generateKeyPair(MainActivity.this);
@@ -123,6 +126,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     signature.update(SRC_DATA.getBytes());
                     boolean verify = signature.verify(decode);
                     Toast.makeText(MainActivity.this, verify ? "验签通过" : "验签失败", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case R.id.btn_export_key_attestation:
+                // Toast.makeText(this, "haha", Toast.LENGTH_SHORT).show();
+                try {
+                    String s = KeyStoreHelper.getInstance().exportKeyAttestation("test");
+                    Log.wtf(TAG, "KeyAttestation => " + s);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
