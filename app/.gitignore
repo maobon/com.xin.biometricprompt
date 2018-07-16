@@ -1,16 +1,5 @@
 # Created by .ignore support plugin (hsz.mobi)
 .gradle/
-.idea/caches/
-.idea/codeStyles/
-.idea/encodings.xml
-.idea/gradle.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/runConfigurations.xml
-.idea/vcs.xml
-.idea/workspace.xml
 BiometricPrompt-P.iml
 local.properties
-/.idea/libraries/
-/.idea/dictionaries/
 /build/

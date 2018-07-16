@@ -2,8 +2,6 @@
 .gradle/
 BiometricPrompt-P.iml
 local.properties
-/.idea/dictionaries/
-/.idea/
 app/build/
 BiometricPromptDemo.iml
 app/.DS_Store
