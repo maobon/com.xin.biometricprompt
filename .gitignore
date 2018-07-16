@@ -4,7 +4,6 @@ BiometricPrompt-P.iml
 local.properties
 app/build/
 BiometricPromptDemo.iml
-app/libs/
 .DS_Store
 src/.DS_Store
 .idea/
