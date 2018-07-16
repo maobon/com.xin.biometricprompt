@@ -7,6 +7,9 @@ import android.util.Base64;
 
 import org.json.JSONArray;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -14,6 +17,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Calendar;
 
@@ -79,12 +85,13 @@ public class KeyStoreHelper {
         return new KeyPair(publicKey, privateKey);
     }
 
-    public String exportKeyAttestation(String keyUUID) throws Exception {
+    public String exportKeyAttestation(String alias) throws Exception {
         StringBuilder sb = new StringBuilder();
         KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
         ks.load(null);
 
-        Certificate[] certArr = ks.getCertificateChain(keyUUID);
+        Certificate[] certArr = ks.getCertificateChain(alias);
+
         String certArray[] = new String[certArr.length];
 
         int i = 0;
@@ -98,5 +105,29 @@ public class KeyStoreHelper {
         String key_attestation_data = jsonArray.toString();
         sb.append(key_attestation_data);
         return sb.toString();
+    }
+
+    public static X509Certificate generateX509Certificate(String certEntry) {
+
+        InputStream in = null;
+        X509Certificate cert = null;
+        try {
+            byte[] certEntryBytes = certEntry.getBytes();
+            in = new ByteArrayInputStream(certEntryBytes);
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+
+            cert = (X509Certificate) certFactory.generateCertificate(in);
+        } catch (CertificateException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return cert;
     }
 }

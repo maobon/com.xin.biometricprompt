@@ -18,6 +18,7 @@ import com.xin.biometricprompt.fp.FpOperation;
 import com.xin.biometricprompt.keystore.KeyStoreHelper;
 
 import java.security.Signature;
+import java.security.cert.X509Certificate;
 
 /**
  * Android P 生物识别提示框
@@ -135,7 +136,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // Toast.makeText(this, "haha", Toast.LENGTH_SHORT).show();
                 try {
                     String s = KeyStoreHelper.getInstance().exportKeyAttestation("test");
-                    Log.wtf(TAG, "KeyAttestation => " + s);
+                    X509Certificate x509Certificate = KeyStoreHelper.generateX509Certificate(s);
+
+                    KeyAttestationExample.testtest(x509Certificate);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
