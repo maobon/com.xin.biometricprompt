@@ -16,9 +16,10 @@ import com.xin.biometricprompt.bio.Biometric;
 import com.xin.biometricprompt.fp.FpManagerAuthCallback;
 import com.xin.biometricprompt.fp.FpOperation;
 import com.xin.biometricprompt.keystore.KeyStoreHelper;
+import com.xin.biometricprompt.keystore.attestation.FpUtil;
+import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
 
 import java.security.Signature;
-import java.security.cert.X509Certificate;
 
 /**
  * Android P 生物识别提示框
@@ -133,15 +134,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btn_export_key_attestation:
-                // Toast.makeText(this, "haha", Toast.LENGTH_SHORT).show();
-                try {
-                    String s = KeyStoreHelper.getInstance().exportKeyAttestation("test");
-                    X509Certificate x509Certificate = KeyStoreHelper.generateX509Certificate(s);
 
-                    KeyAttestationExample.testtest(x509Certificate);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                KeyASecurityType test = FpUtil.getASecurityLevel("4bac8f56-72b6-4703-a232-c6de8584ed3a");
+                Log.wtf(TAG, test.toString());
+
                 break;
         }
     }
