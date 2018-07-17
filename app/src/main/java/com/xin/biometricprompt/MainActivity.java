@@ -135,9 +135,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.btn_export_key_attestation:
 
-                KeyASecurityType test = FpUtil.getASecurityLevel("4bac8f56-72b6-4703-a232-c6de8584ed3a");
-                Log.wtf(TAG, test.toString());
+//                 KeyASecurityType test = FpUtil.getASecurityLevel("test");
+//                 Log.wtf(TAG, test.toString());
 
+                try {
+                    KeyStoreHelper.getInstance().exportKeyAttestation("test");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
         }
     }

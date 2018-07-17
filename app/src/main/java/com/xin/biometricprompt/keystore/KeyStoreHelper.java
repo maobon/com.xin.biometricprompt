@@ -15,6 +15,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -56,7 +57,8 @@ public class KeyStoreHelper {
                 .setCertificateSubject(certificateSubject)
                 .setCertificateNotBefore(notBefore.getTime())
                 .setCertificateNotAfter(notAfter.getTime())
-                .setUserAuthenticationRequired(true);
+                .setUserAuthenticationRequired(true)
+                .setAttestationChallenge(genChallenge()); // 24 Android N 以后才开始有的
 
         kpGenerator.initialize(builder.build());
         return kpGenerator.generateKeyPair();
@@ -105,6 +107,17 @@ public class KeyStoreHelper {
         String key_attestation_data = jsonArray.toString();
         sb.append(key_attestation_data);
         return sb.toString();
+    }
+
+
+    /**
+     * 挑战值
+     */
+    private byte[] genChallenge() {
+        SecureRandom random = new SecureRandom();
+        byte[] challenge = new byte[32];
+        random.nextBytes(challenge);
+        return challenge;
     }
 
 }
