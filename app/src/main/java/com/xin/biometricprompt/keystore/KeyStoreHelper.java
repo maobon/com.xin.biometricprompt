@@ -107,27 +107,4 @@ public class KeyStoreHelper {
         return sb.toString();
     }
 
-    public static X509Certificate generateX509Certificate(String certEntry) {
-
-        InputStream in = null;
-        X509Certificate cert = null;
-        try {
-            byte[] certEntryBytes = certEntry.getBytes();
-            in = new ByteArrayInputStream(certEntryBytes);
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-
-            cert = (X509Certificate) certFactory.generateCertificate(in);
-        } catch (CertificateException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return cert;
-    }
 }
