@@ -7,3 +7,5 @@ BiometricPromptDemo.iml
 .DS_Store
 src/.DS_Store
 .idea/
+*.iml
+app/src/main/java/com/xin/biometricprompt/AuthUI.java
