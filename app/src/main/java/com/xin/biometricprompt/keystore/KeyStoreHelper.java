@@ -7,9 +7,6 @@ import android.util.Base64;
 
 import org.json.JSONArray;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -18,17 +15,12 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
-import java.util.Calendar;
-
-import javax.security.auth.x500.X500Principal;
+import java.util.UUID;
 
 public class KeyStoreHelper {
 
-    private static final String KEY_ALIAS = "test";
+    private static final String KEY_ALIAS = UUID.randomUUID().toString();
 
     private static KeyStoreHelper instance;
 
@@ -43,20 +35,20 @@ public class KeyStoreHelper {
     }
 
     public KeyPair generateKeyPair(Context context) throws Exception {
-        Calendar notBefore = Calendar.getInstance();
-        Calendar notAfter = Calendar.getInstance();
-        notAfter.add(Calendar.YEAR, 1);
+        //Calendar notBefore = Calendar.getInstance();
+        //Calendar notAfter = Calendar.getInstance();
+        //notAfter.add(Calendar.YEAR, 1);
 
-        X500Principal certificateSubject = new X500Principal(String.format("CN=%s,OU=%s", KEY_ALIAS, context.getPackageName()));
+        //X500Principal certificateSubject = new X500Principal(String.format("CN=%s,OU=%s", KEY_ALIAS, context.getPackageName()));
 
         KeyPairGenerator kpGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
 
         KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_SIGN)
                 .setAlgorithmParameterSpec(new ECGenParameterSpec("prime256v1"))
                 .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA384, KeyProperties.DIGEST_SHA512)
-                .setCertificateSubject(certificateSubject)
-                .setCertificateNotBefore(notBefore.getTime())
-                .setCertificateNotAfter(notAfter.getTime())
+                //.setCertificateSubject(certificateSubject)
+                //.setCertificateNotBefore(notBefore.getTime())
+                //.setCertificateNotAfter(notAfter.getTime())
                 .setUserAuthenticationRequired(true)
                 .setAttestationChallenge(genChallenge()); // 24 Android N 以后才开始有的
 

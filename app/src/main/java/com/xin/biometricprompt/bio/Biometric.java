@@ -5,8 +5,9 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.CancellationSignal;
-import androidx.annotation.RequiresApi;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
 
 public class Biometric {
 
@@ -16,10 +17,10 @@ public class Biometric {
                 .setTitle(title)
                 .setSubtitle(subTitle)
                 .setDescription(desc)
-                .setNegativeButton("取消", context.getMainExecutor(), new DialogInterface.OnClickListener() {
+                .setNegativeButton("使用密码", context.getMainExecutor(), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Toast.makeText(context, "注册取消", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "取消", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .build();

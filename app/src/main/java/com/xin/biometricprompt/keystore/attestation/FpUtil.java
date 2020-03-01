@@ -8,10 +8,6 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.xin.biometricprompt.Logger;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -41,17 +37,14 @@ public class FpUtil {
     public static boolean checkSupport(Context aContext, String keyUUID) {
         try {
             if (null == aContext) {
-                Logger.d(TAG, "context is null");
                 return false;
             }
 
             FingerprintManager pm = (FingerprintManager) aContext.getSystemService(Context.FINGERPRINT_SERVICE);
             if (!pm.isHardwareDetected()) {
-                Logger.d(TAG, "The mobile not support HardwareDetected");
                 return false;
             }
 
-            Logger.d(TAG, "ECDSA Key generation Begin");
             Calendar notBefore = Calendar.getInstance();
             Calendar notAfter = Calendar.getInstance();
             notAfter.add(1, 20);
@@ -76,19 +69,19 @@ public class FpUtil {
 
             kpGenerator.initialize(builder.build());
             kpGenerator.generateKeyPair();
-            Logger.d(TAG, "ECDSA Key generation complete");
 
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
             KeyStore.Entry keyEntry = ks.getEntry(keyUUID, null);
             if (keyEntry == null) {
-                Logger.e(TAG, "Failed to get key entry for uuid " + keyUUID);
                 return false;
             }
+
             Signature signatureOut = Signature.getInstance("SHA256withECDSA");
             signatureOut.initSign(((KeyStore.PrivateKeyEntry) keyEntry).getPrivateKey());
+
         } catch (Exception e) {
-            Logger.e(TAG, "ECDSA Key generation failed." + e.getMessage());
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -105,14 +98,13 @@ public class FpUtil {
             byte[] extensionValue = x509Certificate.getExtensionValue(KEY_DESCRIPTION_OID);
             KeyDescription keyDescription = verifyAttestionExtension(extensionValue);
             if (keyDescription == null) {
-                Logger.e(TAG, "keyDescription is null");
                 return KeyASecurityType.NOATTESTATION;
             }
-            Logger.e(TAG, keyDescription.getAttestationSecurityLevel() + "");
+
             return keyDescription.getAttestationSecurityLevel();
 
         } catch (Exception e) {
-            Logger.e(TAG, "getASecurityLevel: " + e.getMessage());
+            e.printStackTrace();
         }
         return KeyASecurityType.NOATTESTATION;
     }
@@ -128,7 +120,7 @@ public class FpUtil {
             Certificate[] certificates = keyStore.getCertificateChain(keyUUID);
             return certificates;
         } catch (Exception e) {
-            Logger.e(TAG, "getCertificatesFromChain: " + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
@@ -299,23 +291,4 @@ public class FpUtil {
         return value;
     }
 
-    /**
-     * Jni检测环境是否安全
-     */
-    public static boolean jniCheckEnvironment(Context ctx) {
-        try {
-            Class<?> clz = Class.forName("com.noknok.android.client.asm.authenticator.FpAuthenticatorKernel");
-            Constructor<?> constructor = clz.getConstructor();
-            Object instance = constructor.newInstance();
-            Method method = clz.getMethod("performInitJni", boolean.class, Context.class);
-            String invoke = (String) method.invoke(instance, false, ctx);
-            Logger.e("FidoAppSDK", "jni check result: " + invoke);
-            if (TextUtils.equals("no_safe", invoke)) {
-                return true;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "jniCheckEnvironment:" + e.getMessage());
-        }
-        return false;
-    }
 }

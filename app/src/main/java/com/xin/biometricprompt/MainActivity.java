@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (!Biometric.isSupportBiometric(MainActivity.this))
                             return;
 
-                        BiometricPrompt biometricPrompt = Biometric.createPrompt(MainActivity.this, "注册", "指纹", "注册操作");
+                        BiometricPrompt biometricPrompt = Biometric.createPrompt(MainActivity.this, "指纹验证", "Android Keystore Generate Key Pair", "对数据进行签名");
                         BioAuthCallback authCallback = new BioAuthCallback();
                         authCallback.setSrcData(SRC_DATA);
                         authCallback.setCallback(new BioAuthCallback.Callback() {
