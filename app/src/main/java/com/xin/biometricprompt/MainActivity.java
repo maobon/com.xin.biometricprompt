@@ -4,20 +4,18 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.xin.biometricprompt.bio.BioAuthCallback;
 import com.xin.biometricprompt.bio.Biometric;
 import com.xin.biometricprompt.fp.FpManagerAuthCallback;
 import com.xin.biometricprompt.fp.FpOperation;
 import com.xin.biometricprompt.keystore.KeyStoreHelper;
-import com.xin.biometricprompt.keystore.attestation.FpUtil;
-import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
 
 import java.security.Signature;
 
@@ -59,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     KeyStoreHelper keyStoreHelper = KeyStoreHelper.getInstance();
                     keyStoreHelper.generateKeyPair(MainActivity.this);
-                    Signature signature = keyStoreHelper.initSign();
+                    final Signature signature = keyStoreHelper.initSign();
 
                     if (signature == null)
                         return;
@@ -93,11 +91,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         );
 
                     } else {
+
+                        final AuthUI authUI = new AuthUI();
+
                         FpOperation fpOperation = FpOperation.getInstance(MainActivity.this);
 
-                        FpManagerAuthCallback fpManagerAuthCallback = new FpManagerAuthCallback();
-                        fpManagerAuthCallback.setSrcData(SRC_DATA);
-                        fpManagerAuthCallback.setCallback(new FpManagerAuthCallback.Callback() {
+                        FpManagerAuthCallback authCallback = new FpManagerAuthCallback(authUI);
+
+                        authCallback.setSrcData(SRC_DATA);
+                        authCallback.setCallback(new FpManagerAuthCallback.Callback() {
                             @Override
                             public void onProcessed(String text) {
                                 dataSigned = text;
@@ -111,7 +113,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         });
 
-                        fpOperation.startListening(new FingerprintManager.CryptoObject(signature), fpManagerAuthCallback);
+                        fpOperation.startListening(new FingerprintManager.CryptoObject(signature), authCallback);
+
+                        authUI.show(getSupportFragmentManager(), "my_dialog");
+
+                        //...
+                        /*FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                        Fragment prev = getSupportFragmentManager().findFragmentByTag("my_dialog");
+                        if (prev != null) {
+                            Log.wtf(TAG, "之前的不为空 移除");
+                            ft.remove(prev);
+                        }
+
+                        ft.addToBackStack(null);*/
+
+
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

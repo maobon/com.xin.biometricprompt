@@ -1,7 +1,7 @@
 package com.xin.biometricprompt.bio;
 
 import android.hardware.biometrics.BiometricPrompt;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Base64;
 

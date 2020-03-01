@@ -31,6 +31,7 @@ public class FpOperation {
     }
 
     public void startListening(FingerprintManager.CryptoObject cryptoObj, FingerprintManager.AuthenticationCallback callback){
+
         manager.authenticate(cryptoObj, cancelSignal, 0, callback, null);
     }
 

@@ -3,41 +3,87 @@ package com.xin.biometricprompt.fp;
 import android.hardware.fingerprint.FingerprintManager;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
+
+import androidx.fragment.app.DialogFragment;
+
+import com.xin.biometricprompt.AuthUI;
 
 import java.security.Signature;
 
+
 public class FpManagerAuthCallback extends FingerprintManager.AuthenticationCallback {
+
+    private static final String TAG = "FpAuthCallback";
 
     private String srcData;
     private Callback callback;
 
+    private DialogFragment dialogFragment;
+
+    @SuppressWarnings("deprecation")
+    public FpManagerAuthCallback(DialogFragment dialogFragment) {
+        this.dialogFragment = dialogFragment;
+    }
+
     @Override
     public void onAuthenticationError(int errorCode, CharSequence errString) {
         super.onAuthenticationError(errorCode, errString);
+
+        Log.d(TAG, "onAuthenticationError: " + errorCode);
+
+        // 3 FINGERPRINT_ERROR_TIMEOUT
+        // 7 FINGERPRINT_ERROR_LOCKOUT // 30 seconds
+        // 5 ....
+        // 9 FINGERPRINT_ERROR_LOCKOUT_PERMANENT
+
+        if (errorCode != 5) {
+            //dialogFragment.dismissAllowingStateLoss();
+            ((AuthUI) dialogFragment).setMsg("error_code: " + errString);
+
+        }
+
+        // TODO - 需要根据ERROR_CODE 细化 处理控制UI
+
+
     }
 
     @Override
     public void onAuthenticationFailed() {
         super.onAuthenticationFailed();
+
+        Log.d(TAG, "onAuthenticationFailed");
+
     }
 
     @Override
     public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
         super.onAuthenticationHelp(helpCode, helpString);
+
+
+        Log.d(TAG, "onAuthenticationHelp");
+
+
     }
 
     @Override
     public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
         super.onAuthenticationSucceeded(result);
 
+        Log.d(TAG, "onAuthenticationSucceeded");
+
+        dialogFragment.dismissAllowingStateLoss();
+
         String signed = null;
         try {
             Signature signature = result.getCryptoObject().getSignature();
             if (TextUtils.isEmpty(srcData))
                 throw new IllegalArgumentException("src data is null");
+
             signature.update(srcData.getBytes());
             byte[] sign = signature.sign();
             signed = Base64.encodeToString(sign, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -47,6 +93,7 @@ public class FpManagerAuthCallback extends FingerprintManager.AuthenticationCall
     }
 
     public interface Callback {
+
         void onProcessed(String text);
     }
 

@@ -94,7 +94,7 @@ public class KeyStoreHelper {
 
         Certificate[] certArr = ks.getCertificateChain(alias);
 
-        String certArray[] = new String[certArr.length];
+        String[] certArray = new String[certArr.length];
 
         int i = 0;
         for (Certificate cert : certArr) {

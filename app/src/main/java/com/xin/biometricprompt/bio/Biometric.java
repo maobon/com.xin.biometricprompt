@@ -5,7 +5,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.CancellationSignal;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.widget.Toast;
 
 public class Biometric {
