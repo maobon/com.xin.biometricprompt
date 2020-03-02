@@ -17,7 +17,7 @@ import androidx.fragment.app.DialogFragment;
 import java.util.Objects;
 
 
-public class AuthUI extends DialogFragment {
+public class FpAuthUI extends DialogFragment {
 
     private TextView tvLeftTime;
 
@@ -36,7 +36,7 @@ public class AuthUI extends DialogFragment {
         this.msg = msg;
     }
 
-    public AuthUI() {
+    public FpAuthUI() {
         setRetainInstance(true);
     }
 

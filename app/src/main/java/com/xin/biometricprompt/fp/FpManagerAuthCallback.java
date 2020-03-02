@@ -7,7 +7,7 @@ import android.util.Log;
 
 import androidx.fragment.app.DialogFragment;
 
-import com.xin.biometricprompt.AuthUI;
+import com.xin.biometricprompt.FpAuthUI;
 
 import java.security.Signature;
 
@@ -39,7 +39,7 @@ public class FpManagerAuthCallback extends FingerprintManager.AuthenticationCall
 
         if (errorCode != 5) {
             //dialogFragment.dismissAllowingStateLoss();
-            ((AuthUI) dialogFragment).setMsg("error_code: " + errString);
+            ((FpAuthUI) dialogFragment).setMsg("error_code: " + errString);
 
         }
 

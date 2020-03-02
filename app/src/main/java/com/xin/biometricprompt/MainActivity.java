@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     } else {
 
-                        final AuthUI authUI = new AuthUI();
+                        final FpAuthUI authUI = new FpAuthUI();
 
                         FpOperation fpOperation = FpOperation.getInstance(MainActivity.this);
 
