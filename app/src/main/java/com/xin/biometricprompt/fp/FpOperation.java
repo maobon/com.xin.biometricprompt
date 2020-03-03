@@ -30,16 +30,16 @@ public class FpOperation {
         });
     }
 
-    public void startListening(FingerprintManager.CryptoObject cryptoObj, FingerprintManager.AuthenticationCallback callback){
+    public void startListening(FingerprintManager.CryptoObject cryptoObj, FingerprintManager.AuthenticationCallback callback) {
 
         manager.authenticate(cryptoObj, cancelSignal, 0, callback, null);
     }
 
-    public void stopListening(){
+    public void stopListening() {
         cancelSignal.cancel();
     }
 
-    public boolean isEnrolledFingerprints(){
+    public boolean isEnrolledFingerprints() {
         return manager.hasEnrolledFingerprints();
     }
 }

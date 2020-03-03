@@ -1,11 +1,13 @@
 package com.xin.biometricprompt;
 
+import android.content.Context;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -17,7 +19,10 @@ import com.xin.biometricprompt.fp.FpManagerAuthCallback;
 import com.xin.biometricprompt.fp.FpOperation;
 import com.xin.biometricprompt.keystore.KeyStoreHelper;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.Signature;
+import java.util.List;
 
 /**
  * Android P 生物识别提示框

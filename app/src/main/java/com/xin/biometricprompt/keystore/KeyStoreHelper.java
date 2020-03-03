@@ -1,6 +1,5 @@
 package com.xin.biometricprompt.keystore;
 
-import android.content.Context;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
@@ -15,7 +14,6 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.cert.Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.util.UUID;
 
 public class KeyStoreHelper {
@@ -34,23 +32,16 @@ public class KeyStoreHelper {
     private KeyStoreHelper() {
     }
 
-    public KeyPair generateKeyPair(Context context) throws Exception {
-        //Calendar notBefore = Calendar.getInstance();
-        //Calendar notAfter = Calendar.getInstance();
-        //notAfter.add(Calendar.YEAR, 1);
+    public KeyPair generateKeyPair() throws Exception {
 
-        //X500Principal certificateSubject = new X500Principal(String.format("CN=%s,OU=%s", KEY_ALIAS, context.getPackageName()));
-
+        // ALG_ECC
         KeyPairGenerator kpGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
 
-        KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_SIGN)
-                .setAlgorithmParameterSpec(new ECGenParameterSpec("prime256v1"))
-                .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA384, KeyProperties.DIGEST_SHA512)
-                //.setCertificateSubject(certificateSubject)
-                //.setCertificateNotBefore(notBefore.getTime())
-                //.setCertificateNotAfter(notAfter.getTime())
-                .setUserAuthenticationRequired(true)
-                .setAttestationChallenge(genChallenge()); // 24 Android N 以后才开始有的
+        KeyGenParameterSpec.Builder builder =
+                new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_SIGN)
+                        .setDigests(KeyProperties.DIGEST_SHA256)
+                        .setUserAuthenticationRequired(true)
+                        .setAttestationChallenge(genChallenge()); // 24 Android N 以后才开始有的
 
         kpGenerator.initialize(builder.build());
         return kpGenerator.generateKeyPair();
