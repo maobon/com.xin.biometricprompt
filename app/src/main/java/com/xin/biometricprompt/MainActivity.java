@@ -6,7 +6,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -17,8 +16,6 @@ import com.xin.biometricprompt.bio.Biometric;
 import com.xin.biometricprompt.fp.FpManagerAuthCallback;
 import com.xin.biometricprompt.fp.FpOperation;
 import com.xin.biometricprompt.keystore.KeyStoreHelper;
-import com.xin.biometricprompt.keystore.FpUtil;
-import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
 
 import java.security.Signature;
 import java.util.UUID;
@@ -167,10 +164,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 try {
 
-                    String s = KeyStoreHelper.getInstance().exportKeyAttestation(KEY_ALIAS);
+                    //String s = KeyStoreHelper.getInstance().exportKeyAttestation(KEY_ALIAS);
 
-                    KeyASecurityType keyASecurityType = FpUtil.getASecurityLevel(KEY_ALIAS);
-                    Log.wtf(TAG, "==>> " + keyASecurityType.toString());
+                    //KeyASecurityType keyASecurityType = FpUtil.getASecurityLevel(KEY_ALIAS);
+                    //Log.wtf(TAG, "==>> " + keyASecurityType.toString());
 
                 } catch (Exception e) {
                     e.printStackTrace();
