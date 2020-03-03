@@ -61,7 +61,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_register:
                 try {
                     KeyStoreHelper keyStoreHelper = KeyStoreHelper.getInstance();
-                    keyStoreHelper.generateKeyPair(MainActivity.this);
+                    keyStoreHelper.generateKeyPair();
+
                     final Signature signature = keyStoreHelper.initSign();
 
                     if (signature == null)
