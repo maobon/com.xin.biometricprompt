@@ -1,6 +1,5 @@
 package com.xin.biometricprompt;
 
-import android.content.Context;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
@@ -18,11 +17,11 @@ import com.xin.biometricprompt.bio.Biometric;
 import com.xin.biometricprompt.fp.FpManagerAuthCallback;
 import com.xin.biometricprompt.fp.FpOperation;
 import com.xin.biometricprompt.keystore.KeyStoreHelper;
+import com.xin.biometricprompt.keystore.FpUtil;
+import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.security.Signature;
-import java.util.List;
+import java.util.UUID;
 
 /**
  * Android P 生物识别提示框
@@ -39,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String SRC_DATA = "Hello!Android P version, biometric prompt demo.";
     private String dataSigned;
+
+
+    public static final String KEY_ALIAS = UUID.randomUUID().toString();
 
 
     @Override
@@ -72,7 +74,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (!Biometric.isSupportBiometric(MainActivity.this))
                             return;
 
-                        BiometricPrompt biometricPrompt = Biometric.createPrompt(MainActivity.this, "指纹验证", "Android Keystore Generate Key Pair", "对数据进行签名");
+                        BiometricPrompt biometricPrompt = Biometric.createPrompt(MainActivity.this,
+                                "指纹验证",
+                                "Android Keystore Generate Key Pair",
+                                "对数据进行签名"
+                        );
+
                         BioAuthCallback authCallback = new BioAuthCallback();
                         authCallback.setSrcData(SRC_DATA);
                         authCallback.setCallback(new BioAuthCallback.Callback() {
@@ -157,11 +164,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.btn_export_key_attestation:
 
-//                 KeyASecurityType test = FpUtil.getASecurityLevel("test");
-//                 Log.wtf(TAG, test.toString());
 
                 try {
-                    KeyStoreHelper.getInstance().exportKeyAttestation("test");
+
+                    String s = KeyStoreHelper.getInstance().exportKeyAttestation(KEY_ALIAS);
+
+                    KeyASecurityType keyASecurityType = FpUtil.getASecurityLevel(KEY_ALIAS);
+                    Log.wtf(TAG, "==>> " + keyASecurityType.toString());
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

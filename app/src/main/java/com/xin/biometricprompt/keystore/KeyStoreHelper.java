@@ -3,6 +3,7 @@ package com.xin.biometricprompt.keystore;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
+import android.util.Log;
 
 import org.json.JSONArray;
 
@@ -14,11 +15,12 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.cert.Certificate;
-import java.util.UUID;
+
+import static com.xin.biometricprompt.MainActivity.KEY_ALIAS;
 
 public class KeyStoreHelper {
 
-    private static final String KEY_ALIAS = UUID.randomUUID().toString();
+    private static final String TAG = "KS";
 
     private static KeyStoreHelper instance;
 
@@ -82,7 +84,10 @@ public class KeyStoreHelper {
         int i = 0;
         for (Certificate cert : certArr) {
             byte[] buf = cert.getEncoded();
-            certArray[i] = new String(Base64.encode(buf, Base64.DEFAULT));
+            String strCert = new String(Base64.encode(buf, Base64.DEFAULT));
+            Log.wtf(TAG, "str cert:" + strCert);
+
+            certArray[i] = strCert;
             i++;
         }
 

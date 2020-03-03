@@ -1,26 +1,15 @@
-package com.xin.biometricprompt.keystore.attestation;
+package com.xin.biometricprompt.keystore;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.hardware.fingerprint.FingerprintManager;
-import android.os.Build;
-import android.security.keystore.KeyGenParameterSpec;
-import android.text.TextUtils;
 import android.util.Log;
 
-import java.math.BigInteger;
+import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
+import com.xin.biometricprompt.keystore.attestation.KeyDescription;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
-import java.util.Calendar;
-
-import javax.security.auth.x500.X500Principal;
 
 public class FpUtil {
 
@@ -33,59 +22,6 @@ public class FpUtil {
 
     public static final String KEY_DESCRIPTION_OID = "1.3.6.1.4.1.11129.2.1.17";
 
-    @TargetApi(24)
-    public static boolean checkSupport(Context aContext, String keyUUID) {
-        try {
-            if (null == aContext) {
-                return false;
-            }
-
-            FingerprintManager pm = (FingerprintManager) aContext.getSystemService(Context.FINGERPRINT_SERVICE);
-            if (!pm.isHardwareDetected()) {
-                return false;
-            }
-
-            Calendar notBefore = Calendar.getInstance();
-            Calendar notAfter = Calendar.getInstance();
-            notAfter.add(1, 20);
-
-            KeyPairGenerator kpGenerator = KeyPairGenerator.getInstance("EC", "AndroidKeyStore");
-            // 使用的算法材料
-            KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(keyUUID, 4).setDigests("SHA-256")
-                    .setAlgorithmParameterSpec(new ECGenParameterSpec("prime256v1"))
-                    .setCertificateSubject(
-                            new X500Principal(String.format("CN=%s, OU=%s", keyUUID, aContext.getPackageName())))
-                    .setCertificateSerialNumber(BigInteger.ONE).setCertificateNotBefore(notBefore.getTime())
-                    .setCertificateNotAfter(notAfter.getTime()).setUserAuthenticationRequired(true);
-            // 在android7上可设置setAttestationChallenge
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                builder.setAttestationChallenge(genChallenge());
-            }
-
-            // 小米5s实现原因，在某些用例上会造成使用keyStore失败，故不再支持KeyStore
-            if (TextUtils.equals("MI 5s", Build.MODEL)) {
-                return false;
-            }
-
-            kpGenerator.initialize(builder.build());
-            kpGenerator.generateKeyPair();
-
-            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
-            ks.load(null);
-            KeyStore.Entry keyEntry = ks.getEntry(keyUUID, null);
-            if (keyEntry == null) {
-                return false;
-            }
-
-            Signature signatureOut = Signature.getInstance("SHA256withECDSA");
-            signatureOut.initSign(((KeyStore.PrivateKeyEntry) keyEntry).getPrivateKey());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
 
     /**
      * 获取key attestation security level
@@ -97,6 +33,9 @@ public class FpUtil {
 
             byte[] extensionValue = x509Certificate.getExtensionValue(KEY_DESCRIPTION_OID);
             KeyDescription keyDescription = verifyAttestionExtension(extensionValue);
+
+            Log.wtf(TAG, "xx:" + keyDescription);
+
             if (keyDescription == null) {
                 return KeyASecurityType.NOATTESTATION;
             }
@@ -123,16 +62,6 @@ public class FpUtil {
             e.printStackTrace();
         }
         return null;
-    }
-
-    /**
-     * 挑战值
-     */
-    private static byte[] genChallenge() {
-        SecureRandom random = new SecureRandom();
-        byte[] challenge = new byte[32];
-        random.nextBytes(challenge);
-        return challenge;
     }
 
     /**
