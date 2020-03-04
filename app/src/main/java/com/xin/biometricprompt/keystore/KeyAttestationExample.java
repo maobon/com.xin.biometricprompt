@@ -15,10 +15,11 @@
 
 package com.xin.biometricprompt.keystore;
 
+import android.util.Log;
+
 import com.xin.biometricprompt.keystore.sample.AttestationApplicationId;
 import com.xin.biometricprompt.keystore.sample.AttestationApplicationId.AttestationPackageInfo;
 import com.xin.biometricprompt.keystore.sample.AuthorizationList;
-import com.xin.biometricprompt.keystore.sample.CertificateRevocationStatus;
 import com.xin.biometricprompt.keystore.sample.ParsedAttestationRecord;
 import com.xin.biometricprompt.keystore.sample.RootOfTrust;
 
@@ -26,9 +27,6 @@ import org.bouncycastle.util.encoders.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -37,10 +35,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.xin.biometricprompt.keystore.sample.Constants.GOOGLE_ROOT_CERTIFICATE;
 import static com.xin.biometricprompt.keystore.sample.ParsedAttestationRecord.createParsedAttestationRecord;
@@ -65,51 +60,68 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * attestation, Android 7.0 (API level 24) or higher, and Google Play services, your production code
  * should enforce this requirement.
  *
- * <p>3. Checking if any certificate in the chain has been revoked or suspended.
+ * <p>3. Checking if any certificate in the chain has been revoked or suspended. // ??? 请求网络查询证书吊销状态
  *
  * <p>4. Extracting the attestation extension data from the attestation certificate.
  *
  * <p>5. Verifying (and printing) several important data elements from the attestation extension.
  */
+
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class KeyAttestationExample {
 
-    private KeyAttestationExample() {
-    }
+    private static final String TAG = "KeyAttestationExample";
 
-    public static void main(String[] args)
+    /**
+     * Google Sample Code
+     */
+    public static void main(X509Certificate[] certs)
             throws CertificateException, IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 
-        X509Certificate[] certs;
+        /*X509Certificate[] certs;
         if (args.length == 1) {
             String certFilesDir = args[0];
             certs = loadCertificates(certFilesDir);
         } else {
             throw new IOException("Expected path to a directory containing certificates as an argument.");
-        }
+        }*/
 
+        // 证书链校验 使用Google的根证书
         verifyCertificateChain(certs);
 
+        // 解析 Attestation Certificate 证书链的0位证书
         ParsedAttestationRecord parsedAttestationRecord = createParsedAttestationRecord(certs[0]);
 
+        // Attestation 版本与安全等级
         System.out.println("Attestation version: " + parsedAttestationRecord.attestationVersion);
         System.out.println("Attestation Security Level: " + parsedAttestationRecord.attestationSecurityLevel.name());
+
+        // Keymaster 版本与安全等级
         System.out.println("Keymaster Version: " + parsedAttestationRecord.keymasterVersion);
         System.out.println("Keymaster Security Level: " + parsedAttestationRecord.keymasterSecurityLevel.name());
+
+        // 读取生成秘钥对时 设置的挑战值
         System.out.println("Attestation Challenge: " + new String(parsedAttestationRecord.attestationChallenge, UTF_8));
+
+        // 仅有系统应用可以读取该值 其它三方应用返回空
         System.out.println("Unique ID: " + Arrays.toString(parsedAttestationRecord.uniqueId));
+
+        // 软
         System.out.println("Software Enforced Authorization List:");
         AuthorizationList softwareEnforced = parsedAttestationRecord.softwareEnforced;
         printAuthorizationList(softwareEnforced, "\t");
 
+        // 硬 TEE
         System.out.println("TEE Enforced Authorization List:");
         AuthorizationList teeEnforced = parsedAttestationRecord.teeEnforced;
         printAuthorizationList(teeEnforced, "\t");
     }
 
     private static void printAuthorizationList(AuthorizationList authorizationList, String indent) {
+
         // Detailed explanation of the keys and their values can be found here:
         // https://source.android.com/security/keystore/tags
+
         printOptional(authorizationList.purpose, indent + "Purpose(s)");
         printOptional(authorizationList.algorithm, indent + "Algorithm");
         printOptional(authorizationList.keySize, indent + "Key Size");
@@ -162,10 +174,12 @@ public class KeyAttestationExample {
 
     private static void printRootOfTrust(Optional<RootOfTrust> rootOfTrust, String indent) {
         if (rootOfTrust.isPresent()) {
+
             System.out.println(indent + "Verified Boot Key: " + Base64.toBase64String(rootOfTrust.get().verifiedBootKey));
             System.out.println(indent + "Device Locked: " + rootOfTrust.get().deviceLocked);
+
             System.out.println(indent + "Verified Boot State: " + rootOfTrust.get().verifiedBootState.name());
-            System.out.println(indent + "Verified Boot Hash: " + Base64.toBase64String(rootOfTrust.get().verifiedBootHash));
+            //System.out.println(indent + "Verified Boot Hash: " + Base64.toBase64String(rootOfTrust.get().verifiedBootHash));
         }
     }
 
@@ -196,20 +210,26 @@ public class KeyAttestationExample {
             throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException, IOException {
 
         X509Certificate parent = certs[certs.length - 1];
+
         for (int i = certs.length - 1; i >= 0; i--) {
             X509Certificate cert = certs[i];
+
+            // 有效期查询
             // Verify that the certificate has not expired.
             cert.checkValidity();
             cert.verify(parent.getPublicKey());
             parent = cert;
-            try {
+
+            // 联网查询证书吊销状态
+            // Google 的查询地址被墙了 要翻墙才可以正常请求
+            /*try {
                 CertificateRevocationStatus certStatus = CertificateRevocationStatus.fetchStatus(cert.getSerialNumber());
                 if (certStatus != null) {
                     throw new CertificateException("Certificate revocation status is " + certStatus.status.name());
                 }
             } catch (IOException e) {
                 throw new IOException("Unable to fetch certificate status. Check connectivity.");
-            }
+            }*/
         }
 
         // If the attestation is trustworthy and the device ships with hardware-
@@ -220,12 +240,14 @@ public class KeyAttestationExample {
                 .generateCertificate(new ByteArrayInputStream(GOOGLE_ROOT_CERTIFICATE.getBytes(UTF_8)));
 
         if (Arrays.equals(secureRoot.getTBSCertificate(), certs[certs.length - 1].getTBSCertificate())) {
+            Log.wtf(TAG, "== Google ROOT CERT VERIFIED PASS ==");
             System.out.println(
                     "The root certificate is correct, so this attestation is trustworthy, as long as none of"
                             + " the certificates in the chain have been revoked. A production-level system"
                             + " should check the certificate revocation lists using the distribution points that"
                             + " are listed in the intermediate and root certificates.");
         } else {
+            Log.wtf(TAG, "== Google ROOT CERT VERIFIED FAILED ==");
             System.out.println(
                     "The root certificate is NOT correct. The attestation was probably generated by"
                             + " software, not in secure hardware. This means that, although the attestation"
@@ -236,13 +258,16 @@ public class KeyAttestationExample {
         }
     }
 
-    private static X509Certificate[] loadCertificates(String certFilesDir) throws CertificateException, IOException {
+    /*private static X509Certificate[] loadCertificates(String certFilesDir) throws CertificateException, IOException {
         // Load the attestation certificates from the directory in alphabetic order.
+
         List<Path> records;
         try (Stream<Path> pathStream = Files.walk(Paths.get(certFilesDir))) {
             records = pathStream.filter(Files::isRegularFile).sorted().collect(Collectors.toList());
         }
+
         X509Certificate[] certs = new X509Certificate[records.size()];
+
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         for (int i = 0; i < records.size(); ++i) {
             byte[] encodedCert = Files.readAllBytes(records.get(i));
@@ -250,5 +275,5 @@ public class KeyAttestationExample {
             certs[i] = (X509Certificate) factory.generateCertificate(inputStream);
         }
         return certs;
-    }
+    }*/
 }

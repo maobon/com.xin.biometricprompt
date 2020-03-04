@@ -50,33 +50,17 @@ public class ParsedAttestationRecord {
     public final AuthorizationList teeEnforced;
 
     private ParsedAttestationRecord(ASN1Sequence extensionData) {
-        this.attestationVersion =
-                ASN1Parsing.getIntegerFromAsn1(extensionData.getObjectAt(ATTESTATION_VERSION_INDEX));
-        this.attestationSecurityLevel =
-                securityLevelToEnum(
-                        ASN1Parsing.getIntegerFromAsn1(
-                                extensionData.getObjectAt(ATTESTATION_SECURITY_LEVEL_INDEX)));
-        this.keymasterVersion =
-                ASN1Parsing.getIntegerFromAsn1(extensionData.getObjectAt(KEYMASTER_VERSION_INDEX));
-        this.keymasterSecurityLevel =
-                securityLevelToEnum(
-                        ASN1Parsing.getIntegerFromAsn1(
-                                extensionData.getObjectAt(KEYMASTER_SECURITY_LEVEL_INDEX)));
-        this.attestationChallenge =
-                ((ASN1OctetString) extensionData.getObjectAt(ATTESTATION_CHALLENGE_INDEX)).getOctets();
+        this.attestationVersion = ASN1Parsing.getIntegerFromAsn1(extensionData.getObjectAt(ATTESTATION_VERSION_INDEX));
+        this.attestationSecurityLevel = securityLevelToEnum(ASN1Parsing.getIntegerFromAsn1(extensionData.getObjectAt(ATTESTATION_SECURITY_LEVEL_INDEX)));
+        this.keymasterVersion = ASN1Parsing.getIntegerFromAsn1(extensionData.getObjectAt(KEYMASTER_VERSION_INDEX));
+        this.keymasterSecurityLevel = securityLevelToEnum(ASN1Parsing.getIntegerFromAsn1(extensionData.getObjectAt(KEYMASTER_SECURITY_LEVEL_INDEX)));
+        this.attestationChallenge = ((ASN1OctetString) extensionData.getObjectAt(ATTESTATION_CHALLENGE_INDEX)).getOctets();
         this.uniqueId = ((ASN1OctetString) extensionData.getObjectAt(UNIQUE_ID_INDEX)).getOctets();
-        this.softwareEnforced =
-                AuthorizationList.createAuthorizationList(
-                        ((ASN1Sequence) extensionData.getObjectAt(SW_ENFORCED_INDEX)).toArray(),
-                        attestationVersion);
-        this.teeEnforced =
-                AuthorizationList.createAuthorizationList(
-                        ((ASN1Sequence) extensionData.getObjectAt(TEE_ENFORCED_INDEX)).toArray(),
-                        attestationVersion);
+        this.softwareEnforced = AuthorizationList.createAuthorizationList(((ASN1Sequence) extensionData.getObjectAt(SW_ENFORCED_INDEX)).toArray(), attestationVersion);
+        this.teeEnforced = AuthorizationList.createAuthorizationList(((ASN1Sequence) extensionData.getObjectAt(TEE_ENFORCED_INDEX)).toArray(), attestationVersion);
     }
 
-    public static ParsedAttestationRecord createParsedAttestationRecord(X509Certificate cert)
-            throws IOException {
+    public static ParsedAttestationRecord createParsedAttestationRecord(X509Certificate cert) throws IOException {
         ASN1Sequence extensionData = extractAttestationSequence(cert);
         return new ParsedAttestationRecord(extensionData);
     }
@@ -85,17 +69,19 @@ public class ParsedAttestationRecord {
         switch (securityLevel) {
             case KM_SECURITY_LEVEL_SOFTWARE:
                 return SecurityLevel.SOFTWARE;
+
             case KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT:
                 return SecurityLevel.TRUSTED_ENVIRONMENT;
+
             case KM_SECURITY_LEVEL_STRONG_BOX:
                 return SecurityLevel.STRONG_BOX;
+
             default:
                 throw new IllegalArgumentException("Invalid security level.");
         }
     }
 
-    private static ASN1Sequence extractAttestationSequence(X509Certificate attestationCert)
-            throws IOException {
+    private static ASN1Sequence extractAttestationSequence(X509Certificate attestationCert) throws IOException {
         byte[] attestationExtensionBytes = attestationCert.getExtensionValue(KEY_DESCRIPTION_OID);
         if (attestationExtensionBytes == null || attestationExtensionBytes.length == 0) {
             throw new IllegalArgumentException("Couldn't find the keystore attestation extension data.");
@@ -107,6 +93,7 @@ public class ParsedAttestationRecord {
             // Distinguished Encoding Rules (DER)-encoded form. Get the DER
             // bytes.
             byte[] derSequenceBytes = ((ASN1OctetString) asn1InputStream.readObject()).getOctets();
+
             // Decode the bytes as an ASN1 sequence object.
             try (ASN1InputStream seqInputStream = new ASN1InputStream(derSequenceBytes)) {
                 decodedSequence = (ASN1Sequence) seqInputStream.readObject();
@@ -120,8 +107,11 @@ public class ParsedAttestationRecord {
      * on its location within the device.
      */
     public enum SecurityLevel {
+
         SOFTWARE,
+
         TRUSTED_ENVIRONMENT,
+
         STRONG_BOX
     }
 }

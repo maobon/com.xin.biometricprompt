@@ -1,5 +1,6 @@
 package com.xin.biometricprompt.keystore;
 
+import android.util.Base64;
 import android.util.Log;
 
 import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
@@ -11,7 +12,12 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-public class FpUtil {
+/**
+ * 纯手动解析
+ * Google Sample Code用的BC包解析的ASN.1
+ */
+
+public class ExtensionParser {
 
     private static final String TAG = "FpUtil";
 
@@ -22,19 +28,19 @@ public class FpUtil {
 
     public static final String KEY_DESCRIPTION_OID = "1.3.6.1.4.1.11129.2.1.17";
 
-
     /**
      * 获取key attestation security level
      */
     public static KeyASecurityType getASecurityLevel(String keyUUID) {
         try {
-            Certificate[] certificates = getCertificatesFromChain(keyUUID);
+            Certificate[] certificates = getCertChain(keyUUID);
             X509Certificate x509Certificate = (X509Certificate) certificates[0];
 
             byte[] extensionValue = x509Certificate.getExtensionValue(KEY_DESCRIPTION_OID);
-            KeyDescription keyDescription = verifyAttestionExtension(extensionValue);
+            Log.wtf(TAG, "extension val (Base64):" + Base64.encodeToString(extensionValue, Base64.DEFAULT));
 
-            Log.wtf(TAG, "xx:" + keyDescription);
+            KeyDescription keyDescription = verifyAttestionExtension(extensionValue);
+            Log.wtf(TAG, "extension - att challenge val:" + new String(keyDescription.getAttestationChallenge()));
 
             if (keyDescription == null) {
                 return KeyASecurityType.NOATTESTATION;
@@ -51,13 +57,15 @@ public class FpUtil {
     /**
      * 获取证书
      */
-    private static Certificate[] getCertificatesFromChain(String keyUUID) {
+    public static Certificate[] getCertChain(String keyUUID) {
         try {
             KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
 
             Certificate[] certificates = keyStore.getCertificateChain(keyUUID);
+
             return certificates;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,17 +77,22 @@ public class FpUtil {
      */
     private static KeyDescription verifyAttestionExtension(byte[] extension) {
         KeyDescription description = new KeyDescription();
+
         try {
             if (extension == null || extension.length == 0) {
                 return null;
             }
+
             ByteBuffer bufStream = ByteBuffer.wrap(extension);
             bufStream.order(ByteOrder.LITTLE_ENDIAN);
 
             // verify root
             byte rootTag = bufStream.get();
             int rootLength = getASN1Length(bufStream);
-            if (!(rootTag == TAG_ASN1_OCTETSTRING && bufStream.hasRemaining() && bufStream.remaining() == rootLength)) {
+            if (!(rootTag == TAG_ASN1_OCTETSTRING
+                    && bufStream.hasRemaining()
+                    && bufStream.remaining() == rootLength
+            )) {
                 Log.e(TAG, "is not attestation extension by root , maybe not der");
                 return null;
             }
@@ -97,6 +110,7 @@ public class FpUtil {
             int attestationVersionLength = getASN1Length(bufStream);
             byte[] attestationVersionValue = new byte[attestationVersionLength];
             bufStream.get(attestationVersionValue);
+
             if (!(attestationVersionTag == TAG_ASN1_INT)) {
                 Log.e(TAG, "is not attestion extension by attestation version");
                 return null;
@@ -107,6 +121,7 @@ public class FpUtil {
             byte attestationSecurityTag = bufStream.get();
             int attestationSecurityLength = getASN1Length(bufStream);
             byte[] attestationSecurityValue = new byte[attestationSecurityLength];
+
             bufStream.get(attestationSecurityValue);
             if (!(attestationSecurityTag == TAG_ASN1_ENUM)) {
                 Log.e(TAG, "is not attestion extension by tmp1");
@@ -117,13 +132,16 @@ public class FpUtil {
             // verify keymaster version
             byte keymasterVersionTag = bufStream.get();
             int keymasterVersionLength = getASN1Length(bufStream);
+
             if (keymasterVersionLength != 0) {
                 byte[] keymasterVersionValue = new byte[keymasterVersionLength];
                 bufStream.get(keymasterVersionValue);
+
                 if (!(keymasterVersionTag == TAG_ASN1_INT)) {
                     Log.e(TAG, "is not attestion extension by tmp2");
                     return null;
                 }
+
                 description.setKeymasterVersion(keymasterVersionValue[0] & 0xff);
             }
 
@@ -141,6 +159,7 @@ public class FpUtil {
             // verify challenge
             byte challengeTag = bufStream.get();
             int challengeLength = getASN1Length(bufStream);
+
             if (challengeLength != 0) {
                 byte[] challengeValue = new byte[challengeLength];
                 bufStream.get(challengeValue);
@@ -186,7 +205,9 @@ public class FpUtil {
                     return null;
                 }
             }
+
             return description;
+
         } catch (Exception e) {
             Log.e(TAG, "verifyAttestionExtension:" + e.getMessage());
         }
@@ -196,15 +217,18 @@ public class FpUtil {
 
     private static int getASN1Length(ByteBuffer buf) {
         Log.d(TAG, "getASN1Length");
+
         byte tmpLength = buf.get();
         if ((tmpLength & 0x80) == 0) {
             return tmpLength;
+
         } else {
             int lengthLength = tmpLength & 0x7f;
             if (lengthLength > 4) {
                 // extension der will not be large than 65535
                 return -1;
             }
+
             byte[] tmpLengths = new byte[lengthLength];
             buf.get(tmpLengths);
             return byteArrayToInt(tmpLengths);

@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -15,7 +16,9 @@ import com.xin.biometricprompt.bio.BioAuthCallback;
 import com.xin.biometricprompt.bio.Biometric;
 import com.xin.biometricprompt.fp.FpManagerAuthCallback;
 import com.xin.biometricprompt.fp.FpOperation;
+import com.xin.biometricprompt.keystore.ExtensionParser;
 import com.xin.biometricprompt.keystore.KeyStoreHelper;
+import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
 
 import java.security.Signature;
 import java.util.UUID;
@@ -160,14 +163,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btn_export_key_attestation:
-
-
                 try {
 
-                    //String s = KeyStoreHelper.getInstance().exportKeyAttestation(KEY_ALIAS);
+                    KeyASecurityType keyASecurityType = ExtensionParser.getASecurityLevel(KEY_ALIAS);
+                    Log.wtf(TAG, "==>> " + keyASecurityType.toString());
 
-                    //KeyASecurityType keyASecurityType = FpUtil.getASecurityLevel(KEY_ALIAS);
-                    //Log.wtf(TAG, "==>> " + keyASecurityType.toString());
+                    /*new Thread(){
+                        @Override
+                        public void run() {
+
+                            try {
+
+
+                                Certificate[] certChain = FpUtil.getCertChain(KEY_ALIAS);
+
+                                X509Certificate[] certs = new X509Certificate[certChain.length];
+
+                                int i = 0;
+                                for (Certificate certificate : certChain) {
+                                    byte[] encodedCert = certificate.getEncoded();
+                                    CertificateFactory factory = CertificateFactory.getInstance("X.509");
+                                    ByteArrayInputStream inputStream = new ByteArrayInputStream(encodedCert);
+                                    certs[i] = (X509Certificate) factory.generateCertificate(inputStream);
+                                    i++;
+                                }
+
+
+                                KeyAttestationExample.main(certs);
+
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+
+
+
+                        }
+                    }.start();*/
+
+
 
                 } catch (Exception e) {
                     e.printStackTrace();

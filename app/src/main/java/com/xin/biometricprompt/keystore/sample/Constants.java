@@ -18,6 +18,7 @@ package com.xin.biometricprompt.keystore.sample;
 /**
  * Key Attestation constants
  */
+
 public class Constants {
 
     // The Google root certificate that must have been used to sign the root
@@ -56,7 +57,9 @@ public class Constants {
                     + "MDSXYrB4I4WHXPGjxhZuCuPBLTdOLU8YRvMYdEvYebWHMpvwGCF6bAx3JBpIeOQ1"
                     + "wDB5y0USicV3YgYGmi+NZfhA4URSh77Yd6uuJOJENRaNVTzk\n"
                     + "-----END CERTIFICATE-----";
+
     static final String KEY_DESCRIPTION_OID = "1.3.6.1.4.1.11129.2.1.17";
+
     static final int ATTESTATION_VERSION_INDEX = 0;
     static final int ATTESTATION_SECURITY_LEVEL_INDEX = 1;
     static final int KEYMASTER_VERSION_INDEX = 2;
@@ -65,6 +68,7 @@ public class Constants {
     static final int UNIQUE_ID_INDEX = 5;
     static final int SW_ENFORCED_INDEX = 6;
     static final int TEE_ENFORCED_INDEX = 7;
+
     // Authorization list tags. The list is in this AOSP file:
     // hardware/libhardware/include/hardware/keymaster_defs.h
     static final int KM_TAG_PURPOSE = 1;

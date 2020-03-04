@@ -38,19 +38,12 @@ public class RootOfTrust {
     public final byte[] verifiedBootHash;
 
     private RootOfTrust(ASN1Sequence rootOfTrust, int attestationVersion) {
-        this.verifiedBootKey =
-                ((ASN1OctetString) rootOfTrust.getObjectAt(ROOT_OF_TRUST_VERIFIED_BOOT_KEY_INDEX))
-                        .getOctets();
-        this.deviceLocked =
-                ASN1Parsing.getBooleanFromAsn1(rootOfTrust.getObjectAt(ROOT_OF_TRUST_DEVICE_LOCKED_INDEX));
-        this.verifiedBootState =
-                verifiedBootStateToEnum(
-                        ASN1Parsing.getIntegerFromAsn1(
-                                rootOfTrust.getObjectAt(ROOT_OF_TRUST_VERIFIED_BOOT_STATE_INDEX)));
+        this.verifiedBootKey = ((ASN1OctetString) rootOfTrust.getObjectAt(ROOT_OF_TRUST_VERIFIED_BOOT_KEY_INDEX)).getOctets();
+        this.deviceLocked = ASN1Parsing.getBooleanFromAsn1(rootOfTrust.getObjectAt(ROOT_OF_TRUST_DEVICE_LOCKED_INDEX));
+        this.verifiedBootState = verifiedBootStateToEnum(ASN1Parsing.getIntegerFromAsn1(rootOfTrust.getObjectAt(ROOT_OF_TRUST_VERIFIED_BOOT_STATE_INDEX)));
         if (attestationVersion >= 3) {
-            this.verifiedBootHash =
-                    ((ASN1OctetString) rootOfTrust.getObjectAt(ROOT_OF_TRUST_VERIFIED_BOOT_HASH_INDEX))
-                            .getOctets();
+            this.verifiedBootHash = ((ASN1OctetString) rootOfTrust
+                    .getObjectAt(ROOT_OF_TRUST_VERIFIED_BOOT_HASH_INDEX)).getOctets();
         } else {
             this.verifiedBootHash = null;
         }

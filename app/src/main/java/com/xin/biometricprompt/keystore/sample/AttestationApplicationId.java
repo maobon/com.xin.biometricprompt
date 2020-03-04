@@ -39,34 +39,27 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * the secret key material under attestation. The ID can comprise multiple packages if and only if
  * multiple packages share the same UID.
  */
+
 public class AttestationApplicationId implements Comparable<AttestationApplicationId> {
     public final List<AttestationPackageInfo> packageInfos;
     public final List<byte[]> signatureDigests;
 
     private AttestationApplicationId(DEROctetString attestationApplicationId) throws IOException {
-        ASN1Sequence attestationApplicationIdSequence =
-                (ASN1Sequence) ASN1Sequence.fromByteArray(attestationApplicationId.getOctets());
-        ASN1Set attestationPackageInfos =
-                (ASN1Set)
-                        attestationApplicationIdSequence.getObjectAt(
-                                ATTESTATION_APPLICATION_ID_PACKAGE_INFOS_INDEX);
+        ASN1Sequence attestationApplicationIdSequence = (ASN1Sequence) ASN1Sequence.fromByteArray(attestationApplicationId.getOctets());
+        ASN1Set attestationPackageInfos = (ASN1Set) attestationApplicationIdSequence.getObjectAt(ATTESTATION_APPLICATION_ID_PACKAGE_INFOS_INDEX);
         this.packageInfos = new ArrayList<>();
         for (ASN1Encodable packageInfo : attestationPackageInfos) {
             this.packageInfos.add(new AttestationPackageInfo((ASN1Sequence) packageInfo));
         }
 
-        ASN1Set digests =
-                (ASN1Set)
-                        attestationApplicationIdSequence.getObjectAt(
-                                ATTESTATION_APPLICATION_ID_SIGNATURE_DIGESTS_INDEX);
+        ASN1Set digests = (ASN1Set) attestationApplicationIdSequence.getObjectAt(ATTESTATION_APPLICATION_ID_SIGNATURE_DIGESTS_INDEX);
         this.signatureDigests = new ArrayList<>();
         for (ASN1Encodable digest : digests) {
             this.signatureDigests.add(((ASN1OctetString) digest).getOctets());
         }
     }
 
-    AttestationApplicationId(
-            List<AttestationPackageInfo> packageInfos, List<byte[]> signatureDigests) {
+    AttestationApplicationId(List<AttestationPackageInfo> packageInfos, List<byte[]> signatureDigests) {
         this.packageInfos = packageInfos;
         this.signatureDigests = signatureDigests;
     }
@@ -128,16 +121,8 @@ public class AttestationApplicationId implements Comparable<AttestationApplicati
         public final long version;
 
         private AttestationPackageInfo(ASN1Sequence packageInfo) {
-            this.packageName =
-                    new String(
-                            ((ASN1OctetString)
-                                    packageInfo.getObjectAt(ATTESTATION_PACKAGE_INFO_PACKAGE_NAME_INDEX))
-                                    .getOctets(),
-                            UTF_8);
-            this.version =
-                    ((ASN1Integer) packageInfo.getObjectAt(ATTESTATION_PACKAGE_INFO_VERSION_INDEX))
-                            .getValue()
-                            .longValue();
+            this.packageName = new String(((ASN1OctetString) packageInfo.getObjectAt(ATTESTATION_PACKAGE_INFO_PACKAGE_NAME_INDEX)).getOctets(), UTF_8);
+            this.version = ((ASN1Integer) packageInfo.getObjectAt(ATTESTATION_PACKAGE_INFO_VERSION_INDEX)).getValue().longValue();
         }
 
         AttestationPackageInfo(String packageName, long version) {
