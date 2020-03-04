@@ -17,10 +17,15 @@ import com.xin.biometricprompt.bio.Biometric;
 import com.xin.biometricprompt.fp.FpManagerAuthCallback;
 import com.xin.biometricprompt.fp.FpOperation;
 import com.xin.biometricprompt.keystore.ExtensionParser;
+import com.xin.biometricprompt.keystore.KeyAttestationExample;
 import com.xin.biometricprompt.keystore.KeyStoreHelper;
 import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
 
+import java.io.ByteArrayInputStream;
 import java.security.Signature;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.UUID;
 
 /**
@@ -164,43 +169,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.btn_export_key_attestation:
                 try {
-
+                    // old version current use
                     KeyASecurityType keyASecurityType = ExtensionParser.getASecurityLevel(KEY_ALIAS);
-                    Log.wtf(TAG, "==>> " + keyASecurityType.toString());
+                    Log.wtf(TAG, "GMRZ project use:" + keyASecurityType.toString());
 
-                    /*new Thread(){
-                        @Override
-                        public void run() {
+                    // new version google sample code
+                    Certificate[] certChain = ExtensionParser.getCertChain(KEY_ALIAS);
+                    X509Certificate[] certs = new X509Certificate[certChain.length];
 
-                            try {
+                    int i = 0;
+                    for (Certificate certificate : certChain) {
+                        byte[] encodedCert = certificate.getEncoded();
+                        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+                        ByteArrayInputStream inputStream = new ByteArrayInputStream(encodedCert);
+                        certs[i] = (X509Certificate) factory.generateCertificate(inputStream);
+                        i++;
+                    }
 
-
-                                Certificate[] certChain = FpUtil.getCertChain(KEY_ALIAS);
-
-                                X509Certificate[] certs = new X509Certificate[certChain.length];
-
-                                int i = 0;
-                                for (Certificate certificate : certChain) {
-                                    byte[] encodedCert = certificate.getEncoded();
-                                    CertificateFactory factory = CertificateFactory.getInstance("X.509");
-                                    ByteArrayInputStream inputStream = new ByteArrayInputStream(encodedCert);
-                                    certs[i] = (X509Certificate) factory.generateCertificate(inputStream);
-                                    i++;
-                                }
-
-
-                                KeyAttestationExample.main(certs);
-
-                            }catch (Exception e){
-                                e.printStackTrace();
-                            }
-
-
-
-                        }
-                    }.start();*/
-
-
+                    KeyAttestationExample.main(certs);
 
                 } catch (Exception e) {
                     e.printStackTrace();

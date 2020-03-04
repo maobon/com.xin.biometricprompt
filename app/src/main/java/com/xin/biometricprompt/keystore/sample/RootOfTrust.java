@@ -60,12 +60,16 @@ public class RootOfTrust {
         switch (securityLevel) {
             case KM_VERIFIED_BOOT_STATE_VERIFIED:
                 return VerifiedBootState.VERIFIED;
+
             case KM_VERIFIED_BOOT_STATE_SELF_SIGNED:
                 return VerifiedBootState.SELF_SIGNED;
+
             case KM_VERIFIED_BOOT_STATE_UNVERIFIED:
                 return VerifiedBootState.UNVERIFIED;
+
             case KM_VERIFIED_BOOT_STATE_FAILED:
                 return VerifiedBootState.FAILED;
+
             default:
                 throw new IllegalArgumentException("Invalid verified boot state.");
         }
