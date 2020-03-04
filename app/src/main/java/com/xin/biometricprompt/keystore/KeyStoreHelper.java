@@ -1,9 +1,11 @@
 package com.xin.biometricprompt.keystore;
 
 import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyInfo;
 import android.security.keystore.KeyProperties;
+import android.util.Log;
 
-import java.nio.charset.Charset;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -65,6 +67,19 @@ public class KeyStoreHelper {
         PublicKey publicKey = certificate.getPublicKey();
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(KEY_ALIAS, null);
 
+        Log.wtf(TAG, "私钥保存在安全硬件中??:" + isPriInsideSecureHardware(privateKey));
+
         return new KeyPair(publicKey, privateKey);
+    }
+
+    // 查看私钥位置 一般都在TEE中 几乎没有私钥在外面的设备
+    private boolean isPriInsideSecureHardware(PrivateKey privateKey) throws Exception {
+
+        KeyFactory factory = KeyFactory.getInstance(privateKey.getAlgorithm(), "AndroidKeyStore");
+        KeyInfo keySpec = factory.getKeySpec(privateKey, KeyInfo.class);
+
+        // if the key resides inside secure hardware (e.g., Trusted Execution Environment (TEE) or Secure Element (SE)).
+        // Key material of such keys is available in plaintext only inside the secure hardware and is not exposed outside of it.
+        return keySpec.isInsideSecureHardware();
     }
 }

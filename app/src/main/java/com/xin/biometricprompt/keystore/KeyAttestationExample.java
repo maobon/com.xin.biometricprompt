@@ -89,6 +89,12 @@ public class KeyAttestationExample {
         // 证书链校验 使用Google的根证书
         verifyCertificateChain(certs);
 
+        //
+        X509Certificate deviceRootCertificate = certs[certs.length - 1];
+        byte[] encoded = deviceRootCertificate.getTBSCertificate();
+        Log.wtf(TAG, "last one cert: " + android.util.Base64.encodeToString(encoded, android.util.Base64.DEFAULT));
+
+
         // 解析 Attestation Certificate 证书链的0位证书
         ParsedAttestationRecord parsedAttestationRecord = createParsedAttestationRecord(certs[0]);
 
@@ -239,6 +245,8 @@ public class KeyAttestationExample {
         X509Certificate secureRoot = (X509Certificate) CertificateFactory.getInstance("X.509")
                 .generateCertificate(new ByteArrayInputStream(GOOGLE_ROOT_CERTIFICATE.getBytes(UTF_8)));
 
+        Log.wtf(TAG, "Hardcode Google Root Cert:" + android.util.Base64.encodeToString(secureRoot.getTBSCertificate(), android.util.Base64.DEFAULT));
+
         if (Arrays.equals(secureRoot.getTBSCertificate(), certs[certs.length - 1].getTBSCertificate())) {
             Log.wtf(TAG, "== Google ROOT CERT VERIFIED PASS ==");
             System.out.println(
@@ -246,6 +254,7 @@ public class KeyAttestationExample {
                             + " the certificates in the chain have been revoked. A production-level system"
                             + " should check the certificate revocation lists using the distribution points that"
                             + " are listed in the intermediate and root certificates.");
+
         } else {
             Log.wtf(TAG, "== Google ROOT CERT VERIFIED FAILED ==");
             System.out.println(
