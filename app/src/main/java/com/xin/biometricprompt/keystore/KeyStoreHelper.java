@@ -80,6 +80,12 @@ public class KeyStoreHelper {
 
         // if the key resides inside secure hardware (e.g., Trusted Execution Environment (TEE) or Secure Element (SE)).
         // Key material of such keys is available in plaintext only inside the secure hardware and is not exposed outside of it.
-        return keySpec.isInsideSecureHardware();
+        boolean insideSecureHardware = keySpec.isInsideSecureHardware();
+
+        // Whether a key's user authentication authorization is enforced by the secure hardware can be queried using
+        boolean userAuthenticationRequirementEnforcedBySecureHardware =
+                keySpec.isUserAuthenticationRequirementEnforcedBySecureHardware(); // 等价于上面的方法
+
+        return insideSecureHardware;
     }
 }
