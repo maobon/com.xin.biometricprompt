@@ -25,4 +25,18 @@
         android:layout_height="wrap_content"
         android:text="KEY ATTESTATION" />
 
+
+    <Button
+        android:id="@+id/btn_encrypt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="encrypt" />
+
+
+    <Button
+        android:id="@+id/btn_decrypt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="decrypt" />
+
 </LinearLayout>

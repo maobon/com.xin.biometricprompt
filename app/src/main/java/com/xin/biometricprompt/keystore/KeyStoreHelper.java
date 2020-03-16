@@ -5,6 +5,7 @@ import android.security.keystore.KeyInfo;
 import android.security.keystore.KeyProperties;
 import android.util.Log;
 
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -13,6 +14,10 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.Certificate;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.IvParameterSpec;
 
 import static com.xin.biometricprompt.MainActivity.KEY_ALIAS;
 
@@ -87,5 +92,60 @@ public class KeyStoreHelper {
                 keySpec.isUserAuthenticationRequirementEnforcedBySecureHardware(); // 等价于上面的方法
 
         return insideSecureHardware;
+    }
+
+
+    // 加解密
+    public void generateAESKey() throws Exception {
+
+        KeyStore keystore = KeyStore.getInstance("AndroidKeyStore");
+
+        keystore.load(null);
+
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+
+        KeyGenParameterSpec.Builder builderSpec = new KeyGenParameterSpec.Builder(
+                KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT
+        );
+
+        builderSpec
+                .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                .setUserAuthenticationRequired(true)
+                .setKeySize(256);
+
+        keyGenerator.init(builderSpec.build());
+        keyGenerator.generateKey();
+
+        Log.i(TAG, "aes secret key generate complete");
+
+    }
+
+    public Cipher getCipher(int purpose, byte[] IV) throws Exception {
+
+        KeyStore keystore = KeyStore.getInstance("AndroidKeyStore");
+
+        keystore.load(null);
+
+        Key key = keystore.getKey(KEY_ALIAS, null);
+
+        Cipher cipher = Cipher.getInstance(
+                KeyProperties.KEY_ALGORITHM_AES + "/" +
+                        KeyProperties.BLOCK_MODE_CBC + "/" +
+                        KeyProperties.ENCRYPTION_PADDING_PKCS7
+        );
+
+        switch (purpose) {
+            case KeyProperties.PURPOSE_ENCRYPT:
+                cipher.init(Cipher.ENCRYPT_MODE, key);
+                break;
+
+            case KeyProperties.PURPOSE_DECRYPT:
+                cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(IV));
+                break;
+        }
+
+        return cipher;
     }
 }

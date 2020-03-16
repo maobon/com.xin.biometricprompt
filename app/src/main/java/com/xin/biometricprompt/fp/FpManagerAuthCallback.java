@@ -11,19 +11,36 @@ import com.xin.biometricprompt.FpAuthUI;
 
 import java.security.Signature;
 
+import javax.crypto.Cipher;
+
 
 public class FpManagerAuthCallback extends FingerprintManager.AuthenticationCallback {
 
     private static final String TAG = "FpAuthCallback";
+
+    public static byte[] encryptedData;
+    public static byte[] iv;
 
     private String srcData;
     private Callback callback;
 
     private DialogFragment dialogFragment;
 
+    private OPERATION_TYPE opType;
+
+    public enum OPERATION_TYPE {
+
+        SIGN, // 签名验签
+
+        ENCRYPT, // 加密
+
+        DECRYPT // 解密
+    }
+
     @SuppressWarnings("deprecation")
-    public FpManagerAuthCallback(DialogFragment dialogFragment) {
+    public FpManagerAuthCallback(DialogFragment dialogFragment, OPERATION_TYPE opType) {
         this.dialogFragment = dialogFragment;
+        this.opType = opType;
     }
 
     @Override
@@ -76,13 +93,50 @@ public class FpManagerAuthCallback extends FingerprintManager.AuthenticationCall
 
         String signed = null;
         try {
-            Signature signature = result.getCryptoObject().getSignature();
-            if (TextUtils.isEmpty(srcData))
-                throw new IllegalArgumentException("src data is null");
 
-            signature.update(srcData.getBytes());
-            byte[] sign = signature.sign();
-            signed = Base64.encodeToString(sign, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+            switch (opType) {
+                case SIGN:
+                    if (TextUtils.isEmpty(srcData))
+                        throw new IllegalArgumentException("src data is null");
+
+                    // signature
+                    Signature signature = result.getCryptoObject().getSignature();
+                    signature.update(srcData.getBytes());
+
+                    byte[] sign = signature.sign();
+                    signed = Base64.encodeToString(sign, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+                    break;
+
+
+                case ENCRYPT:
+                    if (TextUtils.isEmpty(srcData))
+                        throw new IllegalArgumentException("src data is null");
+
+                    // cipher
+                    Cipher cipher = result.getCryptoObject().getCipher();
+
+
+
+                    encryptedData = cipher.doFinal(srcData.getBytes());
+                    encryptedData = Base64.encode(encryptedData, Base64.DEFAULT);
+
+                    iv = cipher.getIV();
+
+                    Log.wtf(TAG, "ok...");
+
+                    break;
+
+
+                case DECRYPT:
+                    // cipher
+                    Cipher c = result.getCryptoObject().getCipher();
+                    byte[] bytes = c.doFinal(Base64.decode(encryptedData, Base64.DEFAULT));
+
+                    Log.wtf(TAG, "ok..." + new String(bytes));
+
+                    break;
+            }
+
 
         } catch (Exception e) {
             e.printStackTrace();

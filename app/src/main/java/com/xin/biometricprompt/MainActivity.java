@@ -4,6 +4,7 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.security.keystore.KeyProperties;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -27,6 +28,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
+
+import javax.crypto.Cipher;
 
 /**
  * Android P 生物识别提示框
@@ -60,6 +63,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_register).setOnClickListener(this);
         findViewById(R.id.btn_auth).setOnClickListener(this);
         findViewById(R.id.btn_export_key_attestation).setOnClickListener(this);
+
+        findViewById(R.id.btn_encrypt).setOnClickListener(this);
+        findViewById(R.id.btn_decrypt).setOnClickListener(this);
     }
 
     @Override
@@ -114,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         FpOperation fpOperation = FpOperation.getInstance(MainActivity.this);
 
-                        FpManagerAuthCallback authCallback = new FpManagerAuthCallback(authUI);
+                        FpManagerAuthCallback authCallback = new FpManagerAuthCallback(authUI, FpManagerAuthCallback.OPERATION_TYPE.SIGN);
 
                         authCallback.setSrcData(SRC_DATA);
                         authCallback.setCallback(new FpManagerAuthCallback.Callback() {
@@ -132,20 +138,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         });
 
                         fpOperation.startListening(new FingerprintManager.CryptoObject(signature), authCallback);
-
                         authUI.show(getSupportFragmentManager(), "my_dialog");
-
-                        //...
-                        /*FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                        Fragment prev = getSupportFragmentManager().findFragmentByTag("my_dialog");
-                        if (prev != null) {
-                            Log.wtf(TAG, "之前的不为空 移除");
-                            ft.remove(prev);
-                        }
-
-                        ft.addToBackStack(null);*/
-
-
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -191,6 +184,70 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                break;
+
+            case R.id.btn_encrypt:
+
+                try {
+                    KeyStoreHelper keyStoreHelper = KeyStoreHelper.getInstance();
+                    keyStoreHelper.generateAESKey();
+
+                    Cipher cipher = keyStoreHelper.getCipher(KeyProperties.PURPOSE_ENCRYPT, null);
+
+                    //
+                    FpAuthUI authUI = new FpAuthUI();
+
+                    FpOperation fpOperation = FpOperation.getInstance(MainActivity.this);
+                    FpManagerAuthCallback authCallback = new FpManagerAuthCallback(authUI, FpManagerAuthCallback.OPERATION_TYPE.ENCRYPT);
+
+                    authCallback.setSrcData(SRC_DATA);
+
+                    authCallback.setCallback(new FpManagerAuthCallback.Callback() {
+                        @Override
+                        public void onProcessed(String text) {
+
+                        }
+                    });
+
+                    fpOperation.startListening(new FingerprintManager.CryptoObject(cipher), authCallback);
+                    authUI.show(getSupportFragmentManager(), "my_dialog");
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                break;
+
+            case R.id.btn_decrypt:
+
+                try {
+                    KeyStoreHelper keyStoreHelper = KeyStoreHelper.getInstance();
+                    Cipher cipher = keyStoreHelper.getCipher(KeyProperties.PURPOSE_DECRYPT, FpManagerAuthCallback.iv);
+
+                    //
+                    FpAuthUI authUI = new FpAuthUI();
+
+                    FpOperation fpOperation = FpOperation.getInstance(MainActivity.this);
+                    FpManagerAuthCallback authCallback = new FpManagerAuthCallback(authUI, FpManagerAuthCallback.OPERATION_TYPE.DECRYPT);
+
+                    //authCallback.setSrcData(SRC_DATA);
+
+                    authCallback.setCallback(new FpManagerAuthCallback.Callback() {
+                        @Override
+                        public void onProcessed(String text) {
+
+                        }
+                    });
+
+                    fpOperation.startListening(new FingerprintManager.CryptoObject(cipher), authCallback);
+                    authUI.show(getSupportFragmentManager(), "my_dialog");
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
                 break;
         }
     }
