@@ -32,11 +32,29 @@
         android:layout_height="wrap_content"
         android:text="encrypt" />
 
-
     <Button
         android:id="@+id/btn_decrypt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="decrypt" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:id="@+id/btn_java_rsa_decrypt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="JAVA RSA DECRYPT" />
+
+        <Button
+            android:id="@+id/btn_java_rsa_encrypt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/btn_java_rsa_decrypt"
+            android:text="JAVA RSA ENCRYPT" />
+    </RelativeLayout>
 </LinearLayout>

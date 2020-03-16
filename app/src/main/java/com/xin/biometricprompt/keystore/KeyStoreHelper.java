@@ -1,6 +1,8 @@
 package com.xin.biometricprompt.keystore;
 
+import android.content.Context;
 import android.os.Build;
+import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyInfo;
 import android.security.keystore.KeyProperties;
@@ -8,6 +10,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -17,10 +20,12 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.Certificate;
+import java.util.Calendar;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
+import javax.security.auth.x500.X500Principal;
 
 import static com.xin.biometricprompt.MainActivity.KEY_ALIAS;
 
@@ -103,7 +108,7 @@ public class KeyStoreHelper {
     }
 
 
-    // 加解密
+    // 加解密 AES 安卓版本6.0以上
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void generateAESKey() throws Exception {
 
@@ -131,6 +136,7 @@ public class KeyStoreHelper {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public Cipher getCipher(int purpose, byte[] IV) throws Exception {
 
         KeyStore keystore = KeyStore.getInstance("AndroidKeyStore");
@@ -157,4 +163,50 @@ public class KeyStoreHelper {
 
         return cipher;
     }
+
+    //
+    private KeyPair generateRSAKeypairApi18(Context context) throws Exception {
+
+        Calendar localCalendar1 = Calendar.getInstance();
+
+        Calendar localCalendar2;
+        (localCalendar2 = Calendar.getInstance()).add(Calendar.YEAR, 20);
+
+        KeyPairGeneratorSpec.Builder builder = new KeyPairGeneratorSpec.Builder(context);
+        builder.setAlias(KEY_ALIAS)
+                .setSubject(new X500Principal(String.format("CN=%s, OU=%s", KEY_ALIAS, context.getPackageName())))
+                .setSerialNumber(BigInteger.ONE)
+                .setStartDate(localCalendar1.getTime())
+                .setEndDate(localCalendar2.getTime());
+
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
+        generator.initialize(builder.build());
+        return generator.generateKeyPair();
+    }
+
+    public void haha(Context context) throws Exception {
+        String rawData = "RSA_API_18";
+
+        KeyPair keyPair = generateRSAKeypairApi18(context);
+
+        //PrivateKey privateKey = keyPair.getPrivate();
+        PublicKey publicKey = keyPair.getPublic();
+
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] bytes = cipher.doFinal(rawData.getBytes());
+
+        //
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+
+        Key key = keyStore.getKey(KEY_ALIAS, null);
+
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] bytes1 = cipher.doFinal(bytes);
+        Log.wtf("HAHA", "ss=" + new String(bytes1));
+
+    }
+
 }

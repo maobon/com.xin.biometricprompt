@@ -24,6 +24,7 @@ import com.xin.biometricprompt.keystore.KeyStoreHelper;
 import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
 
 import java.io.ByteArrayInputStream;
+import java.security.KeyStore;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -67,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         findViewById(R.id.btn_encrypt).setOnClickListener(this);
         findViewById(R.id.btn_decrypt).setOnClickListener(this);
+
+        findViewById(R.id.btn_java_rsa_encrypt).setOnClickListener(this);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -249,6 +252,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     e.printStackTrace();
                 }
 
+
+                break;
+
+            case R.id.btn_java_rsa_encrypt:
+
+                KeyStoreHelper ksHelper = KeyStoreHelper.getInstance();
+                try {
+                    ksHelper.haha(this);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 break;
         }
