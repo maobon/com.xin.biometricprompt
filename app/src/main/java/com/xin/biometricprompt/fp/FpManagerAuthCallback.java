@@ -1,10 +1,12 @@
 package com.xin.biometricprompt.fp;
 
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 
 import com.xin.biometricprompt.FpAuthUI;
@@ -14,6 +16,7 @@ import java.security.Signature;
 import javax.crypto.Cipher;
 
 
+@RequiresApi(api = Build.VERSION_CODES.M)
 public class FpManagerAuthCallback extends FingerprintManager.AuthenticationCallback {
 
     private static final String TAG = "FpAuthCallback";

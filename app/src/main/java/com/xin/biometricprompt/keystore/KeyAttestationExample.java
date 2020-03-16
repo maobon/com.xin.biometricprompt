@@ -15,6 +15,7 @@
 
 package com.xin.biometricprompt.keystore;
 
+import android.os.Build;
 import android.util.Log;
 
 import com.xin.biometricprompt.keystore.sample.AttestationApplicationId;
@@ -124,6 +125,7 @@ public class KeyAttestationExample {
     }
 
     private static void printAuthorizationList(AuthorizationList authorizationList, String indent) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return;
 
         // Detailed explanation of the keys and their values can be found here:
         // https://source.android.com/security/keystore/tags
@@ -179,6 +181,8 @@ public class KeyAttestationExample {
     }
 
     private static void printRootOfTrust(Optional<RootOfTrust> rootOfTrust, String indent) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return;
+
         if (rootOfTrust.isPresent()) {
 
             System.out.println(indent + "Verified Boot Key: " + Base64.toBase64String(rootOfTrust.get().verifiedBootKey));
@@ -190,6 +194,8 @@ public class KeyAttestationExample {
     }
 
     private static void printAttestationApplicationId(Optional<AttestationApplicationId> attestationApplicationId, String indent) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return;
+
         if (attestationApplicationId.isPresent()) {
             System.out.println(indent + "Package Infos (<package name>, <version>): ");
             for (AttestationPackageInfo info : attestationApplicationId.get().packageInfos) {
@@ -203,6 +209,8 @@ public class KeyAttestationExample {
     }
 
     private static <T> void printOptional(Optional<T> optional, String caption) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return;
+
         if (optional.isPresent()) {
             if (optional.get() instanceof byte[]) {
                 System.out.println(caption + ": " + Base64.toBase64String((byte[]) optional.get()));

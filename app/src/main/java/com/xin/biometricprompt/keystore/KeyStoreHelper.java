@@ -1,9 +1,12 @@
 package com.xin.biometricprompt.keystore;
 
+import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyInfo;
 import android.security.keystore.KeyProperties;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import java.security.Key;
 import java.security.KeyFactory;
@@ -37,6 +40,7 @@ public class KeyStoreHelper {
     private KeyStoreHelper() {
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public KeyPair generateKeyPair() throws Exception {
 
         // ALG_ECC
@@ -52,18 +56,21 @@ public class KeyStoreHelper {
         return kpGenerator.generateKeyPair();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public Signature initSign() throws Exception {
         Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initSign(getKeyPair().getPrivate());
         return signature;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public Signature initVerify() throws Exception {
         Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initVerify(getKeyPair().getPublic());
         return signature;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private KeyPair getKeyPair() throws Exception {
         KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
@@ -78,6 +85,7 @@ public class KeyStoreHelper {
     }
 
     // 查看私钥位置 一般都在TEE中 几乎没有私钥在外面的设备
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private boolean isPriInsideSecureHardware(PrivateKey privateKey) throws Exception {
 
         KeyFactory factory = KeyFactory.getInstance(privateKey.getAlgorithm(), "AndroidKeyStore");
@@ -96,6 +104,7 @@ public class KeyStoreHelper {
 
 
     // 加解密
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void generateAESKey() throws Exception {
 
         KeyStore keystore = KeyStore.getInstance("AndroidKeyStore");

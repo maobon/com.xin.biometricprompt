@@ -2,8 +2,12 @@ package com.xin.biometricprompt.fp;
 
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 import android.os.CancellationSignal;
 
+import androidx.annotation.RequiresApi;
+
+@RequiresApi(api = Build.VERSION_CODES.M)
 public class FpOperation {
 
     private FingerprintManager manager;
