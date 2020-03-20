@@ -185,15 +185,22 @@ public class KeyStoreHelper {
     }
 
     public void haha(Context context) throws Exception {
-        String rawData = "RSA_API_18";
+
+        // 极限是81个汉字
+        String rawData = "一二三四五六七八九十一二三四五六七八九十" +
+                "一二三四五六七八九十一二三四五六七八九十" +
+                "一二三四五六七八九十一二三四五六七八九十" +
+                "一二三四五六七八九十一二三四五六七八九十" +
+                "一";
+
 
         KeyPair keyPair = generateRSAKeypairApi18(context);
 
         //PrivateKey privateKey = keyPair.getPrivate();
         PublicKey publicKey = keyPair.getPublic();
 
+        //
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
         byte[] bytes = cipher.doFinal(rawData.getBytes());
 
