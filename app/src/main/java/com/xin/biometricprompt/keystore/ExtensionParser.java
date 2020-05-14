@@ -64,6 +64,16 @@ public class ExtensionParser {
 
             Certificate[] certificates = keyStore.getCertificateChain(keyUUID);
 
+            // 调试打印
+            int index = 0;
+            for (Certificate cert : certificates) {
+                byte[] encoded = cert.getEncoded();
+                String s = Base64.encodeToString(encoded, Base64.NO_WRAP | Base64.NO_CLOSE | Base64.URL_SAFE | Base64.NO_PADDING);
+                Log.wtf(TAG, String.format("cert index= %d content= %s", index, s));
+                index++;
+            }
+            // 调试打印
+
             return certificates;
 
         } catch (Exception e) {
