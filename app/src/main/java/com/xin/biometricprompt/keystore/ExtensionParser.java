@@ -19,7 +19,7 @@ import java.security.cert.X509Certificate;
 
 public class ExtensionParser {
 
-    private static final String TAG = "FpUtil";
+    private static final String TAG = "ExtensionParser";
 
     public static byte TAG_ASN1_INT = 0X02;
     public static byte TAG_ASN1_SEQUENCE = 0X30;
@@ -68,7 +68,7 @@ public class ExtensionParser {
             int index = 0;
             for (Certificate cert : certificates) {
                 byte[] encoded = cert.getEncoded();
-                String s = Base64.encodeToString(encoded, Base64.NO_WRAP | Base64.NO_CLOSE | Base64.URL_SAFE | Base64.NO_PADDING);
+                String s = Base64.encodeToString(encoded, Base64.DEFAULT);
                 Log.wtf(TAG, String.format("cert index= %d content= %s", index, s));
                 index++;
             }

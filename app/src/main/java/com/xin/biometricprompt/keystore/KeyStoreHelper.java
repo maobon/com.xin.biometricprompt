@@ -50,10 +50,13 @@ public class KeyStoreHelper {
 
         // ALG_ECC
         KeyPairGenerator kpGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
+        //KeyPairGenerator kpGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
 
         KeyGenParameterSpec.Builder builder =
                 new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_SIGN)
                         .setDigests(KeyProperties.DIGEST_SHA256)
+                        //.setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1) //...
+
                         .setUserAuthenticationRequired(true)
                         .setAttestationChallenge("THIS_IS_ATTESTATION_CHALLENGE_VALUE".getBytes()); // 24 Android N 以后才开始有的
 
@@ -64,6 +67,8 @@ public class KeyStoreHelper {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public Signature initSign() throws Exception {
         Signature signature = Signature.getInstance("SHA256withECDSA");
+        //Signature signature = Signature.getInstance("SHA256withRSA");
+
         signature.initSign(getKeyPair().getPrivate());
         return signature;
     }

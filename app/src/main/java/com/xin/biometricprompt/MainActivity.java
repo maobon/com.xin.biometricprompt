@@ -24,7 +24,6 @@ import com.xin.biometricprompt.keystore.KeyStoreHelper;
 import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
 
 import java.io.ByteArrayInputStream;
-import java.security.KeyStore;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -178,11 +177,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     int i = 0;
                     for (Certificate certificate : certChain) {
                         byte[] encodedCert = certificate.getEncoded();
-                        CertificateFactory factory = CertificateFactory.getInstance("X.509");
                         ByteArrayInputStream inputStream = new ByteArrayInputStream(encodedCert);
+
+                        CertificateFactory factory = CertificateFactory.getInstance("X.509");
                         certs[i] = (X509Certificate) factory.generateCertificate(inputStream);
+
                         i++;
                     }
+
+                    //
+                    //
+                    X509Certificate x509Certificate = certs[certChain.length - 1];
+                    //byte[] encoded = x509Certificate.getTBSCertificate();
+                    byte[] encoded = x509Certificate.getEncoded(); // 和TBS不一样
+                    Log.wtf(TAG, "last one cert: " + android.util.Base64.encodeToString(encoded, android.util.Base64.DEFAULT));
+
+
+                    //
+
 
                     KeyAttestationExample.main(certs);
 
