@@ -252,15 +252,13 @@ public class KeyAttestationExample {
         Log.wtf(TAG, "Hardcode Google Root Cert:"
                 + android.util.Base64.encodeToString(secureRoot.getTBSCertificate(), android.util.Base64.DEFAULT));
 
-        //
-
-        /*
+        /* TBS 格式的证书
          * Gets the DER-encoded certificate information, the tbsCertificate from this certificate.
          * This can be used to verify the signature independently.
          */
         byte[] tbsCertificate = secureRoot.getTBSCertificate(); // X509 TBS 规范的 ASN.1
 
-        /*
+        /* 单纯 byte数组
          * Returns the encoded form of this certificate. It is assumed that each certificate type
          * would have only a single form of encoding; for example, X.509 certificates would be encoded as ASN.1 DER.
          */
@@ -268,10 +266,9 @@ public class KeyAttestationExample {
 
         // tbsCertificate is not equal with encoded // 不完全相等
 
-
         // 硬实现的证书可以取出 TBS
+        // 证书链最后一张证书 与 Google的根证书字节数组比对 完全一致为通过
         if (Arrays.equals(secureRoot.getTBSCertificate(), certs[certs.length - 1].getTBSCertificate())) {
-            // 证书链最后一张证书 与 Google的根证书字节数组比对 完全一致为通过
 
             Log.wtf(TAG, "== Google ROOT CERT VERIFIED PASS ==");
 
@@ -307,12 +304,10 @@ public class KeyAttestationExample {
             if (Arrays.equals(eccSecureRoot.getEncoded(), certs[certs.length - 1].getEncoded())) {
                 Log.d(TAG, "ECDSA soft implements verify passed");
 
-            }
-
-            /*else if (Arrays.equals(rsaSecureRoot.getEncoded(), certs[certs.length - 1].getEncoded())) {
+            } else if (Arrays.equals(rsaSecureRoot.getEncoded(), certs[certs.length - 1].getEncoded())) {
                 Log.d(TAG, "RSA soft implements verify passed");
 
-            }*/
+            }
         }
 
     /*private static X509Certificate[] loadCertificates(String certFilesDir) throws CertificateException, IOException {
