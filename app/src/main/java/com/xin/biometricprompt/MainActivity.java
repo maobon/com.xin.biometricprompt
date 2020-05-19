@@ -22,12 +22,15 @@ import com.xin.biometricprompt.keystore.ExtensionParser;
 import com.xin.biometricprompt.keystore.KeyAttestationExample;
 import com.xin.biometricprompt.keystore.KeyStoreHelper;
 import com.xin.biometricprompt.keystore.attestation.KeyASecurityType;
+import com.xin.biometricprompt.keystore.sample.Constants;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.crypto.Cipher;
@@ -64,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_register).setOnClickListener(this);
         findViewById(R.id.btn_auth).setOnClickListener(this);
         findViewById(R.id.btn_export_key_attestation).setOnClickListener(this);
+        findViewById(R.id.btn_compare_cert_public_key).setOnClickListener(this);
 
         findViewById(R.id.btn_encrypt).setOnClickListener(this);
         findViewById(R.id.btn_decrypt).setOnClickListener(this);
@@ -263,19 +267,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-
                 break;
 
             case R.id.btn_java_rsa_encrypt:
-
                 KeyStoreHelper ksHelper = KeyStoreHelper.getInstance();
                 try {
                     ksHelper.haha(this);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                break;
 
+            case R.id.btn_compare_cert_public_key:
+                // 官方硬实现 官方新旧根证书公钥对比测试
+                try {
+                    CertificateFactory certificateFactory = CertificateFactory.getInstance("x509");
+
+                    // Google Android keystore key attestation root cert
+                    Certificate googleRootCertificate = certificateFactory
+                            .generateCertificate(new ByteArrayInputStream(Constants.GOOGLE_ROOT_CERTIFICATE.getBytes()));
+                    byte[] pubkey1 = googleRootCertificate.getPublicKey().getEncoded();
+
+                    // Google Android keystore key attestation root cert. new version
+                    // 新版5G手机会预置新版的根证书. 新版证书的签发时间更新. 证书公钥与原有一致.
+                    InputStream inputStream = getResources().openRawResource(R.raw.certificate);
+                    Certificate googleRootNewCertificate = certificateFactory.generateCertificate(inputStream);
+                    byte[] pubkey2 = googleRootNewCertificate.getPublicKey().getEncoded();
+
+                    boolean equals = Arrays.equals(pubkey1, pubkey2);
+                    Toast.makeText(this, equals ? "公钥相等" : "公钥不相等", Toast.LENGTH_SHORT).show();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
         }
     }

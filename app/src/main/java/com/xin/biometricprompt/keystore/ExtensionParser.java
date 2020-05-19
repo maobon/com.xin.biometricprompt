@@ -65,13 +65,13 @@ public class ExtensionParser {
             Certificate[] certificates = keyStore.getCertificateChain(keyUUID);
 
             // 调试打印
-            int index = 0;
+            /*int index = 0;
             for (Certificate cert : certificates) {
                 byte[] encoded = cert.getEncoded();
                 String s = Base64.encodeToString(encoded, Base64.DEFAULT);
                 Log.wtf(TAG, String.format("cert index= %d content= %s", index, s));
                 index++;
-            }
+            }*/
             // 调试打印
 
             return certificates;
