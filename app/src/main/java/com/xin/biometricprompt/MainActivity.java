@@ -291,11 +291,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     // Google Android keystore key attestation root cert. new version
                     // 新版5G手机会预置新版的根证书. 新版证书的签发时间更新. 证书公钥与原有一致.
                     InputStream inputStream = getResources().openRawResource(R.raw.certificate);
-                    Certificate googleRootNewCertificate = certificateFactory.generateCertificate(inputStream);
-                    byte[] pubkey2 = googleRootNewCertificate.getPublicKey().getEncoded();
+                    Certificate newGoogleRootVivo5gCert = certificateFactory.generateCertificate(inputStream);
+                    byte[] pubkey2 = newGoogleRootVivo5gCert.getPublicKey().getEncoded();
 
                     boolean equals = Arrays.equals(pubkey1, pubkey2);
                     Toast.makeText(this, equals ? "公钥相等" : "公钥不相等", Toast.LENGTH_SHORT).show();
+
+                    // 2020/6/3 Google 官网新增一张 KeyStore Key Attestation 根证书 (硬实现)
+                    InputStream ins = getResources().openRawResource(R.raw.certificate_google_new);
+                    Certificate googleNewOfficialCert = certificateFactory.generateCertificate(ins);
+                    byte[] vivoCert = newGoogleRootVivo5gCert.getEncoded();
+                    byte[] newOfficialCert = googleNewOfficialCert.getEncoded();
+
+                    Log.wtf(TAG, "vivo 5g cert is equals with new official root cert:"
+                            + Arrays.equals(vivoCert, newOfficialCert));
 
                 } catch (Exception e) {
                     e.printStackTrace();
